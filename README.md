@@ -26,7 +26,14 @@ The official MX-Edit software is 32-bit only and doesn't run on a modern Mac. Th
 
 Tested with a real MX300 on macOS (Apple Silicon), in Logic Pro (AU) and as a standalone app.
 
-## Install (build from source)
+## Install
+Download the zip from the [latest release](https://github.com/jdesfossez/mx300-control/releases/latest) and follow its `INSTALL.txt`. The builds aren't signed by Apple, so after copying the files, clear the quarantine flag macOS puts on downloads:
+```sh
+xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/Components/"MX300 Control.component" \
+  ~/Library/Audio/Plug-Ins/VST3/"MX300 Control.vst3" /Applications/"MX300 Control.app"
+```
+
+## Build from source
 Requirements: macOS 12 or later on Apple Silicon, the Xcode command-line tools (`xcode-select --install`), CMake and Ninja (`brew install cmake ninja`).
 
 ```sh

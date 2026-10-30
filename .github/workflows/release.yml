@@ -1,0 +1,62 @@
+name: Release
+
+# Push a tag like v0.1.0 (matching project(VERSION) in CMakeLists.txt) to publish a release.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: macos-14   # Apple Silicon
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the tag matches the project version
+        run: |
+          version=$(sed -n 's/^project(MX300Control VERSION \([0-9.]*\).*/\1/p' CMakeLists.txt)
+          test "v$version" = "$GITHUB_REF_NAME" || { echo "tag $GITHUB_REF_NAME != v$version in CMakeLists.txt"; exit 1; }
+
+      - name: Build and test
+        run: |
+          brew install ninja
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build build
+          ctest --test-dir build --output-on-failure
+
+      - name: Package
+        run: |
+          R=build/plugin/MX300Control_artefacts/Release
+          name="MX300-Control-${GITHUB_REF_NAME}-macOS-arm64"
+          stage="dist/$name"
+          mkdir -p "$stage"
+          cp -R "$R/Standalone/MX300 Control.app" "$R/AU/MX300 Control.component" "$R/VST3/MX300 Control.vst3" "$stage"/
+          # ad-hoc signature over the whole bundle (the linker's only covers the binary); not an Apple Developer ID
+          for b in "$stage"/*.app "$stage"/*.component "$stage"/*.vst3; do
+            codesign --force --deep --sign - "$b"
+            codesign --verify --strict "$b"
+          done
+          cp README.md LICENSE "$stage"/
+          cat > "$stage"/INSTALL.txt <<'TXT'
+          MX300 Control (unofficial), macOS 12+ on Apple Silicon. These builds are not signed by Apple.
+
+          1. Copy the files:
+               MX300 Control.component -> ~/Library/Audio/Plug-Ins/Components/
+               MX300 Control.vst3      -> ~/Library/Audio/Plug-Ins/VST3/
+               MX300 Control.app       -> /Applications/
+          2. Allow them to run (they come from the internet and aren't notarized):
+               xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/Components/"MX300 Control.component" \
+                 ~/Library/Audio/Plug-Ins/VST3/"MX300 Control.vst3" /Applications/"MX300 Control.app"
+          3. Restart your DAW (Logic rescans Audio Units at launch).
+          TXT
+          ditto -c -k --sequesterRsrc --keepParent "$stage" "dist/$name.zip"
+          shasum -a 256 "dist/$name.zip" | tee "dist/$name.zip.sha256"
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/*.zip dist/*.sha256 \
+            --title "MX300 Control $GITHUB_REF_NAME" --generate-notes

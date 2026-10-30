@@ -14,7 +14,7 @@ This project re-implements the MX300 control protocol from its own documentation
 - **Back up before testing a write.** Anything new that writes to the unit should first be tried by hand with a backup made beforehand (`tools/mx300tool/mx300.py dump backup.syx`).
 
 ## Building and testing
-See the [README](README.md#install-build-from-source). Before sending a change:
+See the [README](README.md#build-from-source). Before sending a change:
 ```sh
 cmake --build build && ctest --test-dir build
 python3 tools/mx300tool/test_mx300proto.py && python3 tools/mx300tool/test_mx300params.py
