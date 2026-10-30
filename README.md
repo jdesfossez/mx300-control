@@ -2,6 +2,8 @@
 
 An open-source editor for the **Lexicon MX300** reverb. It runs as a standalone app and as a plugin, built from the same code: **AU / VST3** on macOS (Apple Silicon), and **VST3** on Windows and Linux.
 
+![MX300 Control: the program list on the left; routing, and two processors (Ambience and Mono Delay) with their parameters in real units](docs/screenshot.png)
+
 The plugin doesn't process audio. It controls the unit over USB:
 - it shows every parameter of the loaded program in real units and follows changes made on the unit;
 - the DAW can automate the unit's parameters;
