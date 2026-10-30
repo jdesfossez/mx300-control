@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-14   # Apple Silicon
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install tools
+        run: brew install ninja
+
+      - name: Check generated parameter data is up to date
+        run: |
+          python3 tools/gen_params.py
+          git diff --exit-code core/ParamData.cpp
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Core tests
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Python tool tests
+        working-directory: tools/mx300tool
+        run: |
+          python3 test_mx300proto.py
+          python3 test_mx300params.py
+
+      - name: Validate the AU
+        run: |
+          mkdir -p ~/Library/Audio/Plug-Ins/Components
+          cp -R "build/plugin/MX300Control_artefacts/Release/AU/MX300 Control.component" ~/Library/Audio/Plug-Ins/Components/
+          killall -9 AudioComponentRegistrar || true
+          MX300_DEMO=1 auval -v aufx Mx3c Mxcl
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MX300-Control-unsigned
+          path: |
+            build/plugin/MX300Control_artefacts/Release/AU
+            build/plugin/MX300Control_artefacts/Release/VST3
+            build/plugin/MX300Control_artefacts/Release/Standalone

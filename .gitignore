@@ -1,0 +1,20 @@
+# Vendor material: never commit (see CONTRIBUTING.md)
+re-work/
+*.dmg
+
+# Captures from a real unit (user data / factory content)
+*.syx
+mx300-traffic.log
+
+# Local development log
+HANDOFF.md
+
+# Python
+.venv/
+__pycache__/
+
+# C++ build
+build/
+external/
+
+.DS_Store
