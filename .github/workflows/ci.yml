@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  macos:
     runs-on: macos-14   # Apple Silicon
     steps:
       - uses: actions/checkout@v4
@@ -42,8 +42,57 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: MX300-Control-unsigned
+          name: MX300-Control-macOS-arm64-unsigned
           path: |
             build/plugin/MX300Control_artefacts/Release/AU
+            build/plugin/MX300Control_artefacts/Release/VST3
+            build/plugin/MX300Control_artefacts/Release/Standalone
+
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libasound2-dev libfreetype-dev libfontconfig1-dev \
+            libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxi-dev libxinerama-dev \
+            libxrandr-dev libxrender-dev libglu1-mesa-dev mesa-common-dev
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Core tests
+        run: ctest --test-dir build --output-on-failure
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MX300-Control-Linux-x64
+          path: |
+            build/plugin/MX300Control_artefacts/Release/VST3
+            build/plugin/MX300Control_artefacts/Release/Standalone
+
+  windows:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -A x64
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Core tests
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MX300-Control-Windows-x64
+          path: |
             build/plugin/MX300Control_artefacts/Release/VST3
             build/plugin/MX300Control_artefacts/Release/Standalone

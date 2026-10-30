@@ -1,6 +1,6 @@
 # MX300 Control
 
-An open-source editor for the **Lexicon MX300** reverb on macOS (Apple Silicon). It runs as a standalone app and as an **AU / VST3 plugin**, built from the same code.
+An open-source editor for the **Lexicon MX300** reverb. It runs as a standalone app and as a plugin, built from the same code: **AU / VST3** on macOS (Apple Silicon), and **VST3** on Windows and Linux.
 
 The plugin doesn't process audio. It controls the unit over USB:
 - it shows every parameter of the loaded program in real units and follows changes made on the unit;
@@ -24,18 +24,26 @@ The official MX-Edit software is 32-bit only and doesn't run on a modern Mac. Th
   - **Multiple instances:** several instances share one connection.
 - **Demo unit:** a simulated MX300 for trying the editor without hardware.
 
-Tested with a real MX300 on macOS (Apple Silicon), in Logic Pro (AU) and as a standalone app.
+Tested with a real MX300 on macOS (Apple Silicon), in Logic Pro (AU) and as a standalone app. The Windows and Linux builds compile and pass the tests, but nobody has tried them with a unit yet. Reports are welcome.
 
 ## Install
-Download the zip from the [latest release](https://github.com/jdesfossez/mx300-control/releases/latest) and follow its `INSTALL.txt`. The builds aren't signed by Apple, so after copying the files, clear the quarantine flag macOS puts on downloads:
-```sh
-xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/Components/"MX300 Control.component" \
-  ~/Library/Audio/Plug-Ins/VST3/"MX300 Control.vst3" /Applications/"MX300 Control.app"
-```
+Download the archive for your system from the [latest release](https://github.com/jdesfossez/mx300-control/releases/latest) and follow its `INSTALL.txt`. The builds aren't code-signed.
+
+- **macOS:** after copying the files, clear the quarantine flag macOS puts on downloads:
+  ```sh
+  xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/Components/"MX300 Control.component" \
+    ~/Library/Audio/Plug-Ins/VST3/"MX300 Control.vst3" /Applications/"MX300 Control.app"
+  ```
+- **Windows:** copy the `.vst3` to `C:\Program Files\Common Files\VST3\`. SmartScreen may warn the first time the app is opened. Windows lets only one program use a MIDI port at a time, so if your DAW has the MX300's MIDI port enabled, disable it there.
+- **Linux:** copy the `.vst3` to `~/.vst3/`. The unit is reached through ALSA MIDI.
 
 ## Build from source
-Requirements: macOS 12 or later on Apple Silicon, the Xcode command-line tools (`xcode-select --install`), CMake and Ninja (`brew install cmake ninja`).
+Requirements:
+- **macOS** 12 or later on Apple Silicon: the Xcode command-line tools (`xcode-select --install`), CMake and Ninja (`brew install cmake ninja`).
+- **Windows:** Visual Studio 2022 with the C++ workload and CMake. Configure with `cmake -S . -B build -A x64`, then build with `cmake --build build --config Release`.
+- **Linux:** a C++20 compiler, CMake, Ninja and JUCE's dependencies. On Ubuntu 24.04: `sudo apt install build-essential cmake ninja-build libasound2-dev libfreetype-dev libfontconfig1-dev libx11-dev libxcomposite-dev libxcursor-dev libxext-dev libxi-dev libxinerama-dev libxrandr-dev libxrender-dev libglu1-mesa-dev mesa-common-dev`.
 
+On macOS and Linux:
 ```sh
 git clone https://github.com/jdesfossez/mx300-control.git
 cd mx300-control
@@ -44,7 +52,7 @@ cmake --build build
 ctest --test-dir build                                      # core tests, no hardware needed
 ```
 
-Install the plugins for your user:
+On macOS, install the plugins for your user:
 ```sh
 R=build/plugin/MX300Control_artefacts/Release
 cp -R "$R/AU/MX300 Control.component" ~/Library/Audio/Plug-Ins/Components/

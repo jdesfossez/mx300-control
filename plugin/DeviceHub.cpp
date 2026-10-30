@@ -114,10 +114,15 @@ void DeviceHub::openBestSource()
     auto out = pick (juce::MidiOutput::getAvailableDevices());
     if (out.identifier.isEmpty())
         return;
-    // the input has the same name as the output (one bidirectional USB-MIDI port)
+    // the input normally has the same name as the output (one bidirectional USB-MIDI port);
+    // Windows and ALSA may name the two directions differently
     juce::MidiDeviceInfo in;
-    for (auto& d : juce::MidiInput::getAvailableDevices())
+    const auto inputs = juce::MidiInput::getAvailableDevices();
+    for (auto& d : inputs)
         if (d.name == out.name)
+            in = d;
+    for (auto& d : inputs)
+        if (in.identifier.isEmpty() && looksLikeMx300 (d.name))
             in = d;
     if (in.identifier.isEmpty())
         return;

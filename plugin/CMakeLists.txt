@@ -1,10 +1,16 @@
+# AU only exists on macOS
+set(MX300_FORMATS VST3 Standalone)
+if(APPLE)
+    list(PREPEND MX300_FORMATS AU)
+endif()
+
 juce_add_plugin(MX300Control
     PRODUCT_NAME "MX300 Control"
     COMPANY_NAME "MX300 Control (unofficial)"
     BUNDLE_ID io.github.jdesfossez.mx300control
     PLUGIN_MANUFACTURER_CODE Mxcl
     PLUGIN_CODE Mx3c
-    FORMATS AU VST3 Standalone
+    FORMATS ${MX300_FORMATS}
     IS_SYNTH FALSE
     NEEDS_MIDI_INPUT FALSE
     NEEDS_MIDI_OUTPUT FALSE

@@ -7,7 +7,11 @@ static void pump (int ms) { juce::MessageManager::getInstance()->runDispatchLoop
 
 int main (int argc, char** argv)
 {
+#if JUCE_WINDOWS
+    _putenv_s ("MX300_DEMO", "1");
+#else
     setenv ("MX300_DEMO", "1", 1);
+#endif
     juce::ScopedJuceInitialiser_GUI gui;
     const juce::File out (argc > 1 ? argv[1] : ".");
     out.createDirectory();

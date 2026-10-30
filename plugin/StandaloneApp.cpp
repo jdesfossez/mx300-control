@@ -39,9 +39,9 @@ private:
             setResizable (true, false);
             if (auto* c = getContentComponent())
                 if (auto* e = dynamic_cast<juce::AudioProcessorEditor*> (c))
-                    if (auto* constrainer = e->getConstrainer())
-                        setResizeLimits (constrainer->getMinimumWidth(), constrainer->getMinimumHeight(),
-                                         constrainer->getMaximumWidth(), constrainer->getMaximumHeight());
+                    if (auto* limits = e->getConstrainer())
+                        setResizeLimits (limits->getMinimumWidth(), limits->getMinimumHeight(),
+                                         limits->getMaximumWidth(), limits->getMaximumHeight());
             centreWithSize (getWidth(), getHeight());
             setVisible (true);
         }

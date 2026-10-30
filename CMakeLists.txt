@@ -4,8 +4,10 @@ project(MX300Control VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_OSX_ARCHITECTURES arm64)
-set(CMAKE_OSX_DEPLOYMENT_TARGET 12.0)
+if(APPLE)
+    set(CMAKE_OSX_ARCHITECTURES arm64)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET 12.0)
+endif()
 
 option(MX300_BUILD_PLUGIN "Build the JUCE app and plugins" ON)
 set(MX300_JUCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/JUCE" CACHE PATH "Local JUCE checkout (downloaded if missing)")
@@ -18,7 +20,12 @@ add_library(mx300core STATIC
     core/DeviceSession.cpp
     core/FakeUnit.cpp)
 target_include_directories(mx300core PUBLIC core)
-target_compile_options(mx300core PRIVATE -Wall -Wextra -Wno-missing-field-initializers)
+set_target_properties(mx300core PROPERTIES POSITION_INDEPENDENT_CODE ON)   # linked into the plugin shared libraries
+if(MSVC)
+    target_compile_options(mx300core PRIVATE /W4 /permissive- /utf-8)
+else()
+    target_compile_options(mx300core PRIVATE -Wall -Wextra -Wno-missing-field-initializers)
+endif()
 
 enable_testing()
 add_executable(mx300core_tests core/tests/CoreTests.cpp)

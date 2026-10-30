@@ -1,6 +1,6 @@
 #pragma once
 // One connection to the MX300, shared by every plugin instance in the process (and by the app).
-// Lives on the message thread. Owns the CoreMIDI port (or the demo unit) and the DeviceSession.
+// Lives on the message thread. Owns the MIDI port (or the demo unit) and the DeviceSession.
 
 #include "DeviceSession.h"
 #include "FakeUnit.h"
